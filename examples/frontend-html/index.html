@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaarifX API Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e4e4e7;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      text-align: center;
+      padding: 32px 0 24px;
+      border-bottom: 1px solid #27272a;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f4f4f5;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    .warning-banner {
+      background: #451a03;
+      border: 1px solid #92400e;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #fbbf24;
+      line-height: 1.5;
+    }
+
+    .form-section {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .form-section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #d4d4d8;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: #09090b;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      color: #f4f4f5;
+      font-size: 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #3f3f46;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #6366f1;
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: #d4d4d8;
+    }
+
+    .file-upload {
+      border: 2px dashed #3f3f46;
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .file-upload:hover {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .file-upload.has-file {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-upload-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      opacity: 0.6;
+    }
+
+    .file-upload-text {
+      font-size: 14px;
+      color: #71717a;
+    }
+
+    .file-upload-name {
+      font-size: 13px;
+      color: #22c55e;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .image-preview {
+      margin-top: 12px;
+      max-height: 200px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+
+    .btn-primary:disabled {
+      background: #3f3f46;
+      color: #71717a;
+      cursor: not-allowed;
+    }
+
+    .result-section {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .result-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.streaming {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+    }
+
+    .status-badge.complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .status-badge.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .thinking-block {
+      background: #1e1b2e;
+      border: 1px solid #312e81;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #a5b4fc;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .thinking-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .output-text {
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #e4e4e7;
+      white-space: pre-wrap;
+      min-height: 100px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .output-iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      background: #fff;
+      display: none;
+    }
+
+    .usage-info {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #09090b;
+      border-radius: 8px;
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    .usage-info span {
+      color: #d4d4d8;
+      font-weight: 600;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-message {
+      padding: 8px 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #a5b4fc;
+      margin-bottom: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>MaarifX API Demo</h1>
+      <p>Yapay zeka destekli soru cozme platformu - API test araci</p>
+    </header>
+
+    <div class="warning-banner">
+      <strong>UYARI:</strong> Bu sayfa yalnizca demo/egitim amaçlidir.
+      Uretim ortaminda API anahtarlari asla frontend kodunda bulunmamalidir.
+      Gercek uygulamalarda API cagrilari her zaman backend uzerinden yapilmalidir.
+    </div>
+
+    <div class="form-section">
+      <h2>Ayarlar</h2>
+
+      <div class="form-group">
+        <label>API Anahtari</label>
+        <input type="password" id="apiKey" placeholder="mfx_req_... veya mfx_auth_..." />
+      </div>
+
+      <div class="form-group">
+        <label>Alt Kullanici Tokeni (auth-bazli API icin, opsiyonel)</label>
+        <input type="text" id="subUserToken" placeholder="usr_..." />
+      </div>
+
+      <div class="form-group">
+        <label>Base URL</label>
+        <input type="text" id="baseUrl" value="https://api2.ogretimsayfam.com" />
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Soru</h2>
+
+      <div class="form-group">
+        <div class="file-upload" id="fileUpload">
+          <div class="file-upload-icon">&#128247;</div>
+          <div class="file-upload-text">Soru gorselini secin veya surukleyip birakin</div>
+          <div class="file-upload-name" id="fileName"></div>
+          <input type="file" id="imageInput" accept="image/*" />
+          <img class="image-preview" id="imagePreview" alt="" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ek Metin (opsiyonel)</label>
+        <textarea id="textInput" placeholder="Ek yonerge veya soru metni..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="toggle-group">
+          <label class="toggle">
+            <input type="checkbox" id="drawOnImage" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Gorsel uzerine ciz</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="solveBtn" disabled>Soruyu Coz</button>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="result-header">
+        <h2>Sonuc</h2>
+        <div class="status-badge streaming" id="statusBadge">Bekleniyor</div>
+      </div>
+
+      <div class="status-message" id="statusMessage"></div>
+
+      <div class="thinking-block" id="thinkingBlock">
+        <div class="thinking-label">Dusunme Sureci</div>
+        <div id="thinkingText"></div>
+      </div>
+
+      <div class="output-text" id="outputText"></div>
+      <iframe class="output-iframe" id="outputIframe"></iframe>
+
+      <div class="usage-info" id="usageInfo" style="display: none;">
+        <div>Input: <span id="inputTokens">-</span> token</div>
+        <div>Output: <span id="outputTokens">-</span> token</div>
+        <div>Request ID: <span id="requestId">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiKeyInput = document.getElementById('apiKey');
+    const subUserTokenInput = document.getElementById('subUserToken');
+    const baseUrlInput = document.getElementById('baseUrl');
+    const imageInput = document.getElementById('imageInput');
+    const fileUpload = document.getElementById('fileUpload');
+    const fileName = document.getElementById('fileName');
+    const imagePreview = document.getElementById('imagePreview');
+    const textInput = document.getElementById('textInput');
+    const drawOnImageToggle = document.getElementById('drawOnImage');
+    const solveBtn = document.getElementById('solveBtn');
+    const resultSection = document.getElementById('resultSection');
+    const statusBadge = document.getElementById('statusBadge');
+    const statusMessage = document.getElementById('statusMessage');
+    const thinkingBlock = document.getElementById('thinkingBlock');
+    const thinkingText = document.getElementById('thinkingText');
+    const outputText = document.getElementById('outputText');
+    const outputIframe = document.getElementById('outputIframe');
+    const usageInfo = document.getElementById('usageInfo');
+    const inputTokensEl = document.getElementById('inputTokens');
+    const outputTokensEl = document.getElementById('outputTokens');
+    const requestIdEl = document.getElementById('requestId');
+
+    let selectedFile = null;
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileUpload.classList.add('has-file');
+        solveBtn.disabled = false;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          imagePreview.src = ev.target.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    fileUpload.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUpload.style.borderColor = '#6366f1';
+    });
+
+    fileUpload.addEventListener('dragleave', () => {
+      if (!selectedFile) fileUpload.style.borderColor = '#3f3f46';
+    });
+
+    fileUpload.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileUpload.classList.add('has-file');
+        solveBtn.disabled = false;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          imagePreview.src = ev.target.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    solveBtn.addEventListener('click', async () => {
+      const apiKey = apiKeyInput.value.trim();
+      const baseUrl = baseUrlInput.value.trim().replace(/\/$/, '');
+      const subUserToken = subUserTokenInput.value.trim();
+
+      if (!apiKey) {
+        alert('API anahtari gerekli');
+        apiKeyInput.focus();
+        return;
+      }
+
+      if (!selectedFile) {
+        alert('Gorsel secin');
+        return;
+      }
+
+      resultSection.classList.add('visible');
+      statusBadge.textContent = 'Baglaniyor';
+      statusBadge.className = 'status-badge streaming';
+      statusMessage.style.display = 'none';
+      statusMessage.textContent = '';
+      thinkingBlock.style.display = 'none';
+      thinkingText.textContent = '';
+      outputText.textContent = '';
+      outputText.style.display = 'block';
+      outputIframe.style.display = 'none';
+      outputIframe.src = '';
+      usageInfo.style.display = 'none';
+      solveBtn.disabled = true;
+      solveBtn.innerHTML = '<span class="spinner"></span> Cozuluyor...';
+
+      const drawOnImage = drawOnImageToggle.checked;
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      formData.append('stream', 'true');
+      formData.append('draw_on_image', drawOnImage ? 'true' : 'false');
+
+      const text = textInput.value.trim();
+      if (text) formData.append('text', text);
+
+      try {
+        const headers = { 'X-API-Key': apiKey };
+        if (subUserToken) {
+          headers['X-Sub-User-Token'] = subUserToken;
+        }
+
+        const response = await fetch(`${baseUrl}/v1/solve`, {
+          method: 'POST',
+          headers,
+          body: formData,
+        });
+
+        if (!response.ok) {
+          let errorMsg = `HTTP ${response.status}`;
+          try {
+            const errData = await response.json();
+            errorMsg = errData.error || errorMsg;
+          } catch (_) {}
+          throw new Error(errorMsg);
+        }
+
+        statusBadge.textContent = 'Canli';
+        statusBadge.className = 'status-badge streaming';
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let currentEventType = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('event:')) {
+              currentEventType = line.slice(6).trim();
+            } else if (line.startsWith('data:')) {
+              const dataStr = line.slice(5).trim();
+              handleSSEEvent(currentEventType, dataStr, drawOnImage);
+            } else if (line.startsWith(':')) {
+            } else if (line.trim() === '') {
+              currentEventType = '';
+            }
+          }
+        }
+
+      } catch (err) {
+        statusBadge.textContent = 'Hata';
+        statusBadge.className = 'status-badge error';
+        outputText.textContent = `Hata: ${err.message}`;
+        outputText.style.display = 'block';
+        outputIframe.style.display = 'none';
+      } finally {
+        solveBtn.disabled = false;
+        solveBtn.textContent = 'Soruyu Coz';
+      }
+    });
+
+    function handleSSEEvent(eventType, dataStr, drawOnImage) {
+      let data;
+      try {
+        data = JSON.parse(dataStr);
+      } catch (_) {
+        return;
+      }
+
+      switch (eventType) {
+        case 'accepted':
+          requestIdEl.textContent = data.requestId || '-';
+          statusMessage.textContent = 'Istek kabul edildi, isleniyor...';
+          statusMessage.style.display = 'block';
+          break;
+
+        case 'status':
+          if (data.message === 'classifying' && data.subject) {
+            statusMessage.textContent = `Konu: ${data.subject}`;
+            statusMessage.style.display = 'block';
+          } else if (data.message === 'rendering') {
+            statusMessage.textContent = `Gorsel olusturuluyor... (adim ${data.step})`;
+            statusMessage.style.display = 'block';
+          } else {
+            statusMessage.textContent = data.message || '';
+            statusMessage.style.display = 'block';
+          }
+          break;
+
+        case 'thinking':
+          thinkingBlock.style.display = 'block';
+          thinkingText.textContent += data.token || '';
+          // Otomatik asagi kaydir
+          thinkingBlock.scrollTop = thinkingBlock.scrollHeight;
+          break;
+
+        case 'thinking_done':
+          // Dusunme bitti, cozum basliyor
+          break;
+
+        case 'token':
+          if (!drawOnImage) {
+            outputText.textContent += data.token || '';
+            outputText.scrollTop = outputText.scrollHeight;
+          }
+          break;
+
+        case 'complete':
+          statusBadge.textContent = 'Tamamlandi';
+          statusBadge.className = 'status-badge complete';
+          statusMessage.style.display = 'none';
+
+          if (drawOnImage && data.view_url) {
+            // Gorsel uzerine cizim: iframe ile goster
+            outputText.style.display = 'none';
+            outputIframe.style.display = 'block';
+            outputIframe.src = data.view_url;
+          } else if (data.text) {
+            outputText.textContent = data.text;
+          }
+
+          // Kullanim bilgisi
+          if (data.usage) {
+            usageInfo.style.display = 'flex';
+            inputTokensEl.textContent = (data.usage.input_tokens || 0).toLocaleString('tr-TR');
+            outputTokensEl.textContent = (data.usage.output_tokens || 0).toLocaleString('tr-TR');
+          }
+
+          if (data.requestId) {
+            requestIdEl.textContent = data.requestId;
+          }
+          break;
+
+        case 'error':
+          statusBadge.textContent = 'Hata';
+          statusBadge.className = 'status-badge error';
+          outputText.textContent = `Hata: ${data.message || 'Bilinmeyen hata'}`;
+          outputText.style.display = 'block';
+          outputIframe.style.display = 'none';
+          break;
+      }
+    }
+  </script>
+</body>
+</html>
