@@ -28,6 +28,9 @@ class MaarifXClient {
     String? classLevel,
     String? userToken,
   }) async {
+    if (drawOnImage && (classLevel == null || !['7', '8', '9', '10', '11'].contains(classLevel))) {
+      throw MaarifXException('classLevel (7-11) is required when drawOnImage=true', 400);
+    }
     final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/v1/solve'));
     request.headers.addAll(_headers);
     if (userToken != null) request.headers['X-Sub-User-Token'] = userToken;
@@ -35,9 +38,9 @@ class MaarifXClient {
     request.files.add(await http.MultipartFile.fromPath('image', image.path));
     request.fields['stream'] = 'false';
     request.fields['draw_on_image'] = drawOnImage.toString();
+    if (classLevel != null) request.fields['classLevel'] = classLevel;
     if (text != null) request.fields['text'] = text;
     if (detailLevel != null) request.fields['detailLevel'] = detailLevel.toString();
-    if (classLevel != null) request.fields['classLevel'] = classLevel;
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
@@ -59,6 +62,9 @@ class MaarifXClient {
     String? classLevel,
     String? userToken,
   }) async* {
+    if (drawOnImage && (classLevel == null || !['7', '8', '9', '10', '11'].contains(classLevel))) {
+      throw MaarifXException('classLevel (7-11) is required when drawOnImage=true', 400);
+    }
     final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/v1/solve'));
     request.headers.addAll(_headers);
     if (userToken != null) request.headers['X-Sub-User-Token'] = userToken;
@@ -66,9 +72,9 @@ class MaarifXClient {
     request.files.add(await http.MultipartFile.fromPath('image', image.path));
     request.fields['stream'] = 'true';
     request.fields['draw_on_image'] = drawOnImage.toString();
+    if (classLevel != null) request.fields['classLevel'] = classLevel;
     if (text != null) request.fields['text'] = text;
     if (detailLevel != null) request.fields['detailLevel'] = detailLevel.toString();
-    if (classLevel != null) request.fields['classLevel'] = classLevel;
 
     final streamedResponse = await request.send();
 

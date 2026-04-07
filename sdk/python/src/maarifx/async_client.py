@@ -13,9 +13,12 @@ from .exceptions import (
     AuthenticationError,
     MaarifXError,
     TimeoutError,
+    ValidationError,
 )
 from .models import SolveResult, StreamEvent, SubUser, UsageStats, ViewResult
 from .streaming import aiter_sse
+
+VALID_CLASS_LEVELS = ("7", "8", "9", "10", "11")
 
 
 class AsyncMaarifX:
@@ -46,12 +49,7 @@ class AsyncMaarifX:
             headers={"X-API-Key": self.api_key},
         )
 
-    # ------------------------------------------------------------------
-    # Lifecycle
-    # ------------------------------------------------------------------
-
     async def close(self) -> None:
-        """Close the underlying HTTP client."""
         await self._client.aclose()
 
     async def __aenter__(self) -> "AsyncMaarifX":
@@ -60,15 +58,10 @@ class AsyncMaarifX:
     async def __aexit__(self, *exc: object) -> None:
         await self.close()
 
-    # ------------------------------------------------------------------
-    # Image helpers
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _prepare_image(
         image: ImageInput,
     ) -> tuple[str, bytes, str]:
-        """Return (filename, data, content_type) from an image input."""
         if isinstance(image, (str, Path)):
             path = Path(image)
             return (
@@ -94,6 +87,15 @@ class AsyncMaarifX:
         class_level: Optional[str],
         stream: bool,
     ) -> dict:
+        if draw_on_image and not class_level:
+            raise ValidationError(
+                f"class_level is required when draw_on_image=True. "
+                f"Must be one of {VALID_CLASS_LEVELS}."
+            )
+        if class_level and str(class_level) not in VALID_CLASS_LEVELS:
+            raise ValidationError(
+                f"class_level must be one of {VALID_CLASS_LEVELS}, got '{class_level}'"
+            )
         filename, data, ct = self._prepare_image(image)
         files: dict = {
             "image": (filename, data, ct),
@@ -103,12 +105,8 @@ class AsyncMaarifX:
             "stream": (None, str(stream).lower()),
         }
         if class_level is not None:
-            files["class_level"] = (None, str(class_level))
+            files["classLevel"] = (None, str(class_level))
         return files
-
-    # ------------------------------------------------------------------
-    # Solve
-    # ------------------------------------------------------------------
 
     async def solve(
         self,
@@ -116,8 +114,8 @@ class AsyncMaarifX:
         text: str = "",
         *,
         draw_on_image: bool = True,
-        detail_level: int = 3,
         class_level: Optional[str] = None,
+        detail_level: int = 3,
         sub_user_token: Optional[str] = None,
     ) -> SolveResult:
         """Send an image for solving and return the complete result.
@@ -126,12 +124,9 @@ class AsyncMaarifX:
             image: Image as a file path, raw bytes, or file-like object.
             text: Optional question or context.
             draw_on_image: Whether to draw annotations on the image.
+            class_level: Grade level ("7"-"11"). Required when draw_on_image=True.
             detail_level: Detail level (1-5).
-            class_level: Grade/class level hint.
             sub_user_token: Sub-user token for auth-based billing.
-
-        Returns:
-            A ``SolveResult`` with the answer.
         """
         files = self._build_solve_files(
             image, text, draw_on_image, detail_level, class_level, stream=False
@@ -152,15 +147,11 @@ class AsyncMaarifX:
         text: str = "",
         *,
         draw_on_image: bool = True,
-        detail_level: int = 3,
         class_level: Optional[str] = None,
+        detail_level: int = 3,
         sub_user_token: Optional[str] = None,
     ) -> AsyncIterator[StreamEvent]:
-        """Send an image for solving and stream events as they arrive.
-
-        Yields ``StreamEvent`` objects including tokens, status updates,
-        and the final ``complete`` event.
-        """
+        """Send an image for solving and stream events as they arrive."""
         files = self._build_solve_files(
             image, text, draw_on_image, detail_level, class_level, stream=True
         )
@@ -175,17 +166,12 @@ class AsyncMaarifX:
             async for event in aiter_sse(response):
                 yield event
 
-    # ------------------------------------------------------------------
-    # User management
-    # ------------------------------------------------------------------
-
     async def register_user(
         self,
         external_id: str,
         display_name: Optional[str] = None,
         email: Optional[str] = None,
     ) -> SubUser:
-        """Register a new sub-user under your API key."""
         payload: dict = {"external_id": external_id}
         if display_name is not None:
             payload["display_name"] = display_name
@@ -195,38 +181,25 @@ class AsyncMaarifX:
         return SubUser.model_validate(resp)
 
     async def verify_user(self, token: str) -> dict:
-        """Verify a sub-user token."""
         return await self._request(
             "POST", "/v1/users/verify", json={"token": token}
         )
 
     async def list_users(self) -> list[SubUser]:
-        """List all sub-users under your API key."""
         resp = await self._request("GET", "/v1/users")
         users = resp.get("sub_users", resp.get("users", []))
         return [SubUser.model_validate(u) for u in users]
 
     async def delete_user(self, external_id: str) -> dict:
-        """Deactivate a sub-user by external ID."""
         return await self._request("DELETE", f"/v1/users/{external_id}")
 
-    # ------------------------------------------------------------------
-    # Usage & views
-    # ------------------------------------------------------------------
-
     async def get_usage(self) -> UsageStats:
-        """Retrieve usage statistics for your API key."""
         resp = await self._request("GET", "/v1/usage")
         return UsageStats.model_validate(resp)
 
     async def get_view_url(self, request_id: str) -> ViewResult:
-        """Get a temporary view URL for a solved request."""
         resp = await self._request("GET", f"/v1/view/{request_id}")
         return ViewResult.model_validate(resp)
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
 
     async def _request(self, method: str, path: str, **kwargs) -> dict:
         resp = await self._request_raw(method, path, **kwargs)

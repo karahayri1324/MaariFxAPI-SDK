@@ -5,6 +5,7 @@ client = MaarifX(api_key="your-api-key-here")
 result = client.solve(
     image="problem.png",
     text="Solve this step by step",
+    class_level="9",
     draw_on_image=True,
     detail_level=3,
 )
@@ -16,6 +17,7 @@ print(f"Tokens used: {result.usage.input_tokens} in / {result.usage.output_token
 result = client.solve(
     image="problem.png",
     text="What is the answer?",
+    class_level="10",
     draw_on_image=False,
 )
 

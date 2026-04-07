@@ -38,6 +38,7 @@ class _SolvePageState extends State<SolvePage> {
 
   File? _selectedImage;
   bool _drawOnImage = false;
+  String _classLevel = '9';
   bool _isLoading = false;
   String _status = '';
   String _outputText = '';
@@ -73,6 +74,7 @@ class _SolvePageState extends State<SolvePage> {
         image: _selectedImage!,
         text: _textController.text.isNotEmpty ? _textController.text : null,
         drawOnImage: _drawOnImage,
+        classLevel: _classLevel,
       )) {
         if (!mounted) return;
 
@@ -192,6 +194,19 @@ class _SolvePageState extends State<SolvePage> {
                 border: OutlineInputBorder(),
               ),
               maxLines: 2,
+            ),
+            const SizedBox(height: 12),
+
+            DropdownButtonFormField<String>(
+              value: _classLevel,
+              decoration: const InputDecoration(
+                labelText: 'Class Level',
+                border: OutlineInputBorder(),
+              ),
+              items: ['7', '8', '9', '10', '11']
+                  .map((v) => DropdownMenuItem(value: v, child: Text('$v. Sinif')))
+                  .toList(),
+              onChanged: (v) => setState(() => _classLevel = v!),
             ),
             const SizedBox(height: 12),
 

@@ -8,6 +8,7 @@ print("Streaming solve...\n")
 for event in client.solve_stream(
     image="problem.png",
     text="Solve step by step",
+    class_level="9",
     draw_on_image=False,
     detail_level=3,
 ):

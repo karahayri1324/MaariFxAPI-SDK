@@ -98,6 +98,8 @@ class MaarifX:
             name = "image.png"
         return (name, image.read(), _guess_content_type(name))
 
+    VALID_CLASS_LEVELS = ("7", "8", "9", "10", "11")
+
     def _build_solve_files(
         self,
         image: ImageInput,
@@ -107,6 +109,15 @@ class MaarifX:
         class_level: Optional[str],
         stream: bool,
     ) -> dict:
+        if draw_on_image and not class_level:
+            raise ValidationError(
+                "class_level is required when draw_on_image=True. "
+                f"Must be one of {self.VALID_CLASS_LEVELS}."
+            )
+        if class_level and str(class_level) not in self.VALID_CLASS_LEVELS:
+            raise ValidationError(
+                f"class_level must be one of {self.VALID_CLASS_LEVELS}, got '{class_level}'"
+            )
         filename, data, ct = self._prepare_image(image)
         files: dict = {
             "image": (filename, data, ct),
@@ -116,7 +127,7 @@ class MaarifX:
             "stream": (None, str(stream).lower()),
         }
         if class_level is not None:
-            files["class_level"] = (None, str(class_level))
+            files["classLevel"] = (None, str(class_level))
         return files
 
     def solve(
@@ -125,8 +136,8 @@ class MaarifX:
         text: str = "",
         *,
         draw_on_image: bool = True,
-        detail_level: int = 3,
         class_level: Optional[str] = None,
+        detail_level: int = 3,
         sub_user_token: Optional[str] = None,
     ) -> SolveResult:
         """Send an image for solving and return the complete result.
@@ -135,8 +146,8 @@ class MaarifX:
             image: Image as a file path, raw bytes, or file-like object.
             text: Optional question or context.
             draw_on_image: Whether to draw annotations on the image.
+            class_level: Grade level ("7"-"11"). Required when draw_on_image=True.
             detail_level: Detail level (1-5).
-            class_level: Grade/class level hint.
             sub_user_token: Sub-user token for auth-based billing.
 
         Returns:
@@ -161,8 +172,8 @@ class MaarifX:
         text: str = "",
         *,
         draw_on_image: bool = True,
-        detail_level: int = 3,
         class_level: Optional[str] = None,
+        detail_level: int = 3,
         sub_user_token: Optional[str] = None,
     ) -> Iterator[StreamEvent]:
         """Send an image for solving and stream events as they arrive.

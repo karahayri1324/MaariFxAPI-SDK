@@ -67,7 +67,7 @@ from maarifx import MaarifX
 client = MaarifX(api_key="mfx_req_...")
 
 # Senkron cozum
-result = client.solve("soru.png", draw_on_image=False)
+result = client.solve("soru.png", class_level="9", draw_on_image=False)
 print(result.text)
 print(f"Kullanim: {result.usage.input_tokens} input, {result.usage.output_tokens} output")
 ```
@@ -75,14 +75,14 @@ print(f"Kullanim: {result.usage.input_tokens} input, {result.usage.output_tokens
 #### Gorsel Uzerine Cizim (draw_on_image=true)
 
 ```python
-result = client.solve("soru.png", draw_on_image=True)
+result = client.solve("soru.png", class_level="9", draw_on_image=True)
 print(result.view_url)  # Tarayicida acilabilir URL
 ```
 
 #### Streaming (Token Token)
 
 ```python
-for event in client.solve_stream("soru.png"):
+for event in client.solve_stream("soru.png", class_level="9"):
     if event.type == "token":
         print(event.token, end="", flush=True)
     elif event.type == "thinking":
@@ -163,7 +163,7 @@ Soru cozme endpoint'i. Gorsel gonderin, cozum alin.
 | `draw_on_image` | Boolean | Hayir | `false` | `true` ise cozum gorsel uzerine cizilir |
 | `stream` | Boolean | Hayir | `true` | `false` ise senkron JSON cevap doner |
 | `detailLevel` | Integer | Hayir | `3` | Cozum detay seviyesi (1-5) |
-| `classLevel` | String | Hayir | `null` | Sinif seviyesi (orn: "9", "10", "TYT") |
+| `classLevel` | String | `draw_on_image=true` ise **evet** | - | Sinif seviyesi: `"7"`, `"8"`, `"9"`, `"10"`, `"11"` |
 
 #### Cevap: Senkron Mod (stream=false)
 
@@ -538,19 +538,19 @@ from maarifx import MaarifX
 client = MaarifX(api_key="mfx_req_...")
 
 # Basit cozum
-result = client.solve("fizik_sorusu.png")
+result = client.solve("fizik_sorusu.png", class_level="9")
 print(result.text)
 
 # Gorsel uzerine cizim
-result = client.solve("fizik_sorusu.png", draw_on_image=True)
+result = client.solve("fizik_sorusu.png", class_level="9", draw_on_image=True)
 print(result.view_url)
 
 # Ek parametrelerle
 result = client.solve(
     "fizik_sorusu.png",
     text="Bu soruyu detayli coz",
+    class_level="11",
     detail_level=5,
-    class_level="TYT",
     draw_on_image=False
 )
 ```
@@ -577,7 +577,7 @@ from maarifx import MaarifX
 
 client = MaarifX(api_key="mfx_req_...")
 
-for event in client.solve_stream("fizik_sorusu.png"):
+for event in client.solve_stream("fizik_sorusu.png", class_level="9"):
     match event.type:
         case "accepted":
             print(f"Istek kabul edildi: {event.request_id}")
@@ -616,6 +616,7 @@ print(f"Token: {sub_user.token}")  # Bunu veritabaniniza kaydedin!
 # 2. Alt kullanici ile soru coz
 result = client.solve(
     "fizik_sorusu.png",
+    class_level="9",
     sub_user_token=sub_user.token
 )
 print(result.text)
@@ -701,7 +702,7 @@ def coz():
     image.save("/tmp/soru.png")
 
     def generate():
-        for event in client.solve_stream("/tmp/soru.png"):
+        for event in client.solve_stream("/tmp/soru.png", class_level="9"):
             if event.type == "token":
                 yield f"data: {event.token}\n\n"
             elif event.type == "complete":
@@ -747,8 +748,3 @@ Tam calisan ornek uygulamalar icin `examples/` klasorune bakin:
 | [`examples/frontend-html/`](examples/frontend-html/) | Tek dosya HTML demo (SSE streaming) |
 | [`examples/flutter-app/`](examples/flutter-app/) | Flutter/Dart mobil uygulama ornegi (SSE + WebView) |
 
----
-
-## Destek
-
-Sorulariniz icin: admin dashboard uzerinden iletisime gecin.

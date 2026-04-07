@@ -16,6 +16,7 @@ print(f"Token valid: {info.get('valid')}")
 result = client.solve(
     image="problem.png",
     text="Solve this problem",
+    class_level="11",
     draw_on_image=True,
     sub_user_token=user.token,
 )
