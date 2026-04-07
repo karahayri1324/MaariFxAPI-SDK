@@ -30,8 +30,8 @@ MaarifX API iki farkli kullanim modeli sunar:
 | Key formati | `mfx_req_...` | `mfx_auth_...` |
 | Hedef kitle | Tekil uygulama | Distributor / platform |
 | Kullanici yonetimi | Yok | Alt kullanici sistemi |
-| Ucretlendirme | Token bazli | Token bazli |
-| Rate limit | Gunluk + aylik | Gunluk + aylik + kullanici basi |
+| Ucretlendirme | Token bazli (bakiye sistemi) | Yok (hesap bazli, rate limit ile sinirli) |
+| Rate limit | Gunluk + aylik + bakiye | Gunluk + aylik + kullanici basi |
 
 ### Ne Yapar?
 
@@ -99,7 +99,8 @@ for event in client.solve_stream("soru.png"):
 
 En basit kullanim modeli. Tek bir API key ile dogrudan istek gonderirsiniz.
 
-- **Ucretlendirme:** $1 / 1M input token, $7 / 1M output token (varsayilan, admin tarafindan ayarlanabilir)
+- **Ucretlendirme:** Token bazli bakiye sistemi. $1 / 1M input token, $7 / 1M output token (varsayilan, admin tarafindan ayarlanabilir)
+- **Bakiye:** Her API key'in bir USD bakiyesi vardir. Bakiye bitince istekler reddedilir (HTTP 402)
 - **Rate limit:** Gunluk ve aylik istek limiti (admin tarafindan ayarlanir)
 - **Kullanim alani:** Kendi uygulamanizda dogrudan kullanim
 
@@ -113,6 +114,7 @@ Headers:
 
 Distributor modeli. Kendi kullanicilarinizi MaarifX sistemine kaydedersiniz; her kullanicinin kendi limitleri ve tokeni olur.
 
+- **Ucretlendirme:** Yok. Hesap bazli calisir, token ucretlendirmesi yapilmaz. Admin panelde kullanim istatistikleri (token sayilari, tahmini maliyet) izlenebilir ancak bakiye veya ucret kesilmez.
 - **Alt kullanici kayit sistemi:** `/v1/users/register` ile kullanici olusturma
 - **Kullanici basi gunluk limit:** Her alt kullanicinin ayri istek limiti
 - **Fraud onleme:** Kullanici bazinda izleme ve limit
@@ -375,9 +377,12 @@ API key'in kullanim istatistiklerini dondurur.
   "limits": {
     "daily": 100,
     "monthly": 3000
-  }
+  },
+  "balance_usd": 8.42
 }
 ```
+
+> **Not:** `balance_usd` alani sadece istek bazli (`mfx_req_...`) API key'lerde doner. Auth bazli key'lerde bu alan bulunmaz.
 
 ---
 
@@ -636,6 +641,7 @@ client.delete_user("ogrenci_42")
 |-----|----------|---------------|
 | `400` | Gecersiz istek parametreleri | Gorsel eksik, `external_id` eksik |
 | `401` | Kimlik dogrulama hatasi | Gecersiz API key, eksik `X-Sub-User-Token` |
+| `402` | Yetersiz bakiye | Istek bazli API key'de bakiye bitmis |
 | `403` | Yetki hatasi | Devre disi API key, devre disi kullanici, max kullanici limiti |
 | `409` | Cakisma | `external_id` zaten kayitli |
 | `429` | Rate limit asimi | Gunluk veya aylik istek limiti dolmus |
@@ -739,6 +745,7 @@ Tam calisan ornek uygulamalar icin `examples/` klasorune bakin:
 | [`examples/backend-python/`](examples/backend-python/) | Flask ile distributor backend ornegi |
 | [`examples/backend-node/`](examples/backend-node/) | Express.js ile distributor backend ornegi |
 | [`examples/frontend-html/`](examples/frontend-html/) | Tek dosya HTML demo (SSE streaming) |
+| [`examples/flutter-app/`](examples/flutter-app/) | Flutter/Dart mobil uygulama ornegi (SSE + WebView) |
 
 ---
 
