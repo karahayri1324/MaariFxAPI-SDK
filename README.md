@@ -54,7 +54,7 @@ Admin dashboard uzerinden API key olusturun. Iki tip key vardir:
 ### 2. Python SDK Kurulumu
 
 ```bash
-pip install maarifx
+pip install git+https://github.com/karahayri1324/MaariFxAPI-SDK.git#subdirectory=sdk/python
 ```
 
 ### 3. Ilk Isteginiz
@@ -527,7 +527,7 @@ Bu satir SSE standartina gore yorum satirdir ve istemci tarafindan goz ardi edil
 ### Kurulum
 
 ```bash
-pip install maarifx
+pip install git+https://github.com/karahayri1324/MaariFxAPI-SDK.git#subdirectory=sdk/python
 ```
 
 ### Senkron Kullanim
