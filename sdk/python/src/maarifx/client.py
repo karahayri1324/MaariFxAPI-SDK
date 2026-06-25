@@ -108,6 +108,8 @@ class MaarifX:
         detail_level: int,
         class_level: Optional[str],
         stream: bool,
+        samimiyet: Optional[int] = None,
+        student_intro: Optional[str] = None,
     ) -> dict:
         if draw_on_image and not class_level:
             raise ValidationError(
@@ -128,6 +130,10 @@ class MaarifX:
         }
         if class_level is not None:
             files["classLevel"] = (None, str(class_level))
+        if samimiyet is not None:
+            files["samimiyet"] = (None, str(samimiyet))
+        if student_intro:
+            files["studentIntro"] = (None, str(student_intro))
         return files
 
     def solve(
@@ -139,6 +145,8 @@ class MaarifX:
         class_level: Optional[str] = None,
         detail_level: int = 3,
         sub_user_token: Optional[str] = None,
+        samimiyet: Optional[int] = None,
+        student_intro: Optional[str] = None,
     ) -> SolveResult:
         """Send an image for solving and return the complete result.
 
@@ -149,12 +157,15 @@ class MaarifX:
             class_level: Grade level ("7"-"11"). Required when draw_on_image=True.
             detail_level: Detail level (1-5).
             sub_user_token: Sub-user token for auth-based billing.
+            samimiyet: Teacher intimacy/tone level (1=formal … 4=very warm).
+            student_intro: Short student self-introduction for personalization.
 
         Returns:
             A ``SolveResult`` with the answer.
         """
         files = self._build_solve_files(
-            image, text, draw_on_image, detail_level, class_level, stream=False
+            image, text, draw_on_image, detail_level, class_level, stream=False,
+            samimiyet=samimiyet, student_intro=student_intro,
         )
         headers: dict[str, str] = {}
         if sub_user_token:
@@ -175,6 +186,8 @@ class MaarifX:
         class_level: Optional[str] = None,
         detail_level: int = 3,
         sub_user_token: Optional[str] = None,
+        samimiyet: Optional[int] = None,
+        student_intro: Optional[str] = None,
     ) -> Iterator[StreamEvent]:
         """Send an image for solving and stream events as they arrive.
 
@@ -182,7 +195,8 @@ class MaarifX:
         and the final ``complete`` event.
         """
         files = self._build_solve_files(
-            image, text, draw_on_image, detail_level, class_level, stream=True
+            image, text, draw_on_image, detail_level, class_level, stream=True,
+            samimiyet=samimiyet, student_intro=student_intro,
         )
         headers: dict[str, str] = {}
         if sub_user_token:
