@@ -164,6 +164,9 @@ Soru cozme endpoint'i. Gorsel gonderin, cozum alin.
 | `stream` | Boolean | Hayir | `true` | `false` ise senkron JSON cevap doner |
 | `detailLevel` | Integer | Hayir | `3` | Cozum detay seviyesi (1-5) |
 | `classLevel` | String | `draw_on_image=true` ise **evet** | - | Sinif seviyesi: `"7"`, `"8"`, `"9"`, `"10"`, `"11"` |
+| `model` | String | Hayir | `"3.0"` | Model surumu: `"3.0"` veya `"3.0-max"` (derin cozumleme) |
+
+> **Not (`model`):** `3.0-max` yalnizca `draw_on_image=true` ve gorsel iceren isteklerde calisir. Bu kosullar saglanmazsa sunucu istegi hata vermeden `3.0` olarak isler. `3.0-max` daha derin bir on-cozumleme yaptigindan yanit suresi daha uzundur.
 
 #### Cevap: Senkron Mod (stream=false)
 

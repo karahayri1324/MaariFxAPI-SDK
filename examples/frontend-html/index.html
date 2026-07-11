@@ -81,6 +81,7 @@
 
     .form-group input[type="text"],
     .form-group input[type="password"],
+    .form-group select,
     .form-group textarea {
       width: 100%;
       padding: 10px 14px;
@@ -94,9 +95,16 @@
     }
 
     .form-group input:focus,
+    .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
       border-color: #6366f1;
+    }
+
+    .form-group select:disabled {
+      color: #71717a;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
     .form-group textarea {
@@ -448,6 +456,13 @@
           </label>
           <span class="toggle-label">Gorsel uzerine ciz</span>
         </div>
+        <div class="form-group">
+          <label for="modelSelect">Model</label>
+          <select id="modelSelect" disabled>
+            <option value="3.0" selected>3.0 (varsayilan)</option>
+            <option value="3.0-max">3.0-max - Derin cozumleme</option>
+          </select>
+        </div>
       </div>
 
       <button class="btn btn-primary" id="solveBtn" disabled>Soruyu Coz</button>
@@ -487,6 +502,7 @@
     const imagePreview = document.getElementById('imagePreview');
     const textInput = document.getElementById('textInput');
     const drawOnImageToggle = document.getElementById('drawOnImage');
+    const modelSelect = document.getElementById('modelSelect');
     const solveBtn = document.getElementById('solveBtn');
     const resultSection = document.getElementById('resultSection');
     const statusBadge = document.getElementById('statusBadge');
@@ -501,6 +517,16 @@
     const requestIdEl = document.getElementById('requestId');
 
     let selectedFile = null;
+
+    // 3.0-max yalnizca "gorsel uzerine ciz" acikken secilebilir (sunucu aksi halde 3.0'a dusurur)
+    drawOnImageToggle.addEventListener('change', () => {
+      if (drawOnImageToggle.checked) {
+        modelSelect.disabled = false;
+      } else {
+        modelSelect.value = '3.0';
+        modelSelect.disabled = true;
+      }
+    });
 
     imageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -583,6 +609,7 @@
       formData.append('image', selectedFile);
       formData.append('stream', 'true');
       formData.append('draw_on_image', drawOnImage ? 'true' : 'false');
+      formData.append('model', modelSelect.value);
 
       const text = textInput.value.trim();
       if (text) formData.append('text', text);
